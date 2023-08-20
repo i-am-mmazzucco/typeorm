@@ -1,8 +1,25 @@
+import { Logger as NestLogger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
+  const app = await NestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter(),
+  );
+  await app.listen(process.env.PORT || 3000);
+
+  return app.getUrl();
 }
-bootstrap();
+(async (): Promise<void> => {
+  try {
+    await bootstrap();
+    NestLogger.log('http://localhost:3000', 'Bootstrap');
+  } catch (error) {
+    NestLogger.error(error, 'Bootstrap');
+  }
+})();
